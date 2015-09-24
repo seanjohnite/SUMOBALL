@@ -9,10 +9,13 @@ module.exports = function (server) {
     io = socketio(server);
 
     io.on('connection', function (socket) {
+        console.log('emitting newConnection event')
+        io.sockets.emit('newConnection', socket.id);
+
         console.log('connected to', socket.id);
-        socket.on('changeOrientation', function (e) {
-            // console.log(e)
-        })
+        socket.on('changeOrientation', function (newOrientation) {
+            io.emit('updateOrientation', socket.id, newOrientation);
+        });
     });
 
     return io;
