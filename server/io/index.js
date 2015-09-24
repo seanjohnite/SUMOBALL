@@ -8,10 +8,13 @@ module.exports = function (server) {
 
     io = socketio(server);
 
-    io.on('connection', function () {
-        // Now have access to socket, wowzers!
+    io.on('connection', function (socket) {
+        console.log('connected to', socket.id);
+        socket.on('changeOrientation', function (e) {
+            // console.log(e)
+        })
     });
-    
+
     return io;
 
 };
