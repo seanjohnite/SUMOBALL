@@ -42,7 +42,6 @@ app.controller('HomeCtrl', function (Socket){
 
     var initScene, render, renderer, scene, camera, box1, sphere;
 
-    console.log("window inner width", window.innerWidth);
 
     var width = window.innerWidth;
     var height = window.innerHeight - 97;
@@ -119,7 +118,6 @@ app.controller('HomeCtrl', function (Socket){
     };
 
     render = function () {
-        console.log(accel);
         sphere.applyImpulse(accel, {x: 0, y:0, z:0})
         scene.simulate();
         renderer.render(scene, camera);
