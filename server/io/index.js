@@ -9,7 +9,6 @@ module.exports = function (server) {
     io = socketio(server);
 
     io.on('connection', function (socket) {
-        console.log('emitting newConnection event')
         socket.broadcast.emit('newConnection', socket.id);
 
         console.log('connected to', socket.id);

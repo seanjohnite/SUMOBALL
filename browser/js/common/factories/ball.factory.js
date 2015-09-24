@@ -11,12 +11,12 @@ app.factory('Ball', function (Sphere, Material) {
             y: 0,
             z: 0
         };
+        var colors = [0x483d8b, 0xff8c00, 0xffd700, 0xb1fb17, 0x853d8b];
 
-        this.color = 0xCC00FF;
-
+        this.color = colors[Math.floor(Math.random() * colors.length)];
         angular.extend(this, props);
 
-        this.ball = Sphere(5, Material(this.color, 0.8, 0.6));
+        this.ball = Sphere(3, Material(this.color, 0.8, 0.6));
     }
 
     return Ball;

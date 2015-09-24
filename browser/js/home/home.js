@@ -8,7 +8,8 @@ app.config(function ($stateProvider) {
     });
 });
 
-app.controller('HomeCtrl', function ($scope, Socket, Three){
+app.controller('HomeCtrl', function ($scope, Socket, Three, Mobile) {
+
     Socket.on('connect', function () {
         console.log('connected via socket!')
     });
@@ -19,4 +20,5 @@ app.controller('HomeCtrl', function ($scope, Socket, Three){
         $scope.mobile = false;
     }
 
-})
+});
+
