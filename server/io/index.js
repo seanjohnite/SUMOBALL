@@ -10,11 +10,11 @@ module.exports = function (server) {
 
     io.on('connection', function (socket) {
         console.log('emitting newConnection event')
-        io.sockets.emit('newConnection', socket.id);
+        socket.broadcast.emit('newConnection', socket.id);
 
         console.log('connected to', socket.id);
         socket.on('changeOrientation', function (newOrientation) {
-            io.emit('updateOrientation', socket.id, newOrientation);
+            socket.broadcast.emit('updateOrientation', socket.id, newOrientation);
         });
     });
 

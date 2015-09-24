@@ -77,7 +77,25 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         requestAnimationFrame(render);
     };
 
+    // a new challenger appears!!
+    Socket.on('newConnection', function (socketId) {
+        console.log('a new challenger appears!')
+        var thisSphere = new Ball();
+        balls[socketId] = thisSphere;
+        scene.add(thisSphere.ball);
+    });
 
+    // a challenger's phone has moved!
+    Socket.on('updateOrientation', function (socketId, newOrientation) {
+        console.log(newOrientation);
+        var thisBall = balls[socketId];
+        if (!thisBall.origAccel) thisBall.origAccel = {
+                x: newOrientation.beta,
+                z: newOrientation.gamma
+            }
+        thisBall.accel.x = -(origAccel.x - newOrientation.beta);
+        thisBall.accel.z = (origAccel.z - newOrientation.gamma);
+    });
 
     render = function () {
         _.forEach(balls, function (ball) {
@@ -91,24 +109,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
     if (!window.mobilecheck()){
         window.onload = initScene();
     } else {
-        // a new challenger appears!!
-        Socket.on('newConnection', function (socketId) {
-            console.log('a new challenger appears!')
-            var thisSphere = new Ball();
-            balls[socketId] = thisSphere;
-            scene.add(thisSphere.ball);
-        });
 
-        // a challenger's phone has moved!
-        Socket.on('updateOrientation', function (socketId, newOrientation) {
-            var thisBall = balls[socketId];
-            if (!thisBall.origAccel) thisBall.origAccel = {
-                    x: newOrientation.beta,
-                    z: newOrientation.gamma
-                }
-            thisBall.accel.x = -(origAccel.x - newOrientation.beta);
-            thisBall.accel.z = (origAccel.z - newOrientation.gamma);
-        });
     }
 
     return {}
