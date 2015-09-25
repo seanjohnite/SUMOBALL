@@ -8,11 +8,29 @@ app.config(function ($stateProvider) {
     });
 });
 
-app.controller('HomeCtrl', function ($scope, Socket, Three, Mobile) {
+app.controller('HomeCtrl', function ($scope, Socket, Three, Mobile, $modal) {
 
     Socket.on('connect', function () {
         console.log('connected via socket!')
     });
+
+    $scope.save = function (user) {
+        Socket.emit('newUser', user);
+    }
+
+    // if (Mobile.isMobile) {
+    //     var modalInstance = $modal.open({
+    //         animation: false,
+    //         templateUrl: '/js/common/modals/start.modal.html',
+    //         size: 'sm'
+    //     });
+
+    //     modalInstance.result
+    //     .then(function () {
+
+    //     });
+    // }
+
 
     if (window.mobilecheck()) {
         $scope.mobile = true;

@@ -2,19 +2,7 @@
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
 
-    if (window.DeviceOrientationEvent && window.mobilecheck()) {
-        // var count = 0;
-        window.addEventListener('deviceorientation', function (e) {
-            var newPos = {
-                alpha: e.alpha,
-                beta: e.beta,
-                gamma: e.gamma
-            };
-
-            Socket.emit('changeOrientation', newPos);
-
-        });
-    }
+    var mobile = window.mobilecheck()
 
     var balls = {}
 
@@ -24,7 +12,16 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
     var height = window.innerHeight - 97;
 
     initScene = function () {
-        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer = new THREE.WebGLRenderer({ antialias: false });
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMapSoft = true;
+        renderer.shadowCameraNear = 3;
+        renderer.shadowCameraFov = 50;
+
+        renderer.shadowMapBias = 0.0039;
+        renderer.shadowMapDarkness = 1;
+        renderer.shadowMapWidth = 1024;
+        renderer.shadowMapHeight = 1024;
         renderer.setSize(width, height);
         document.getElementById('home').appendChild(renderer.domElement);
 
@@ -36,32 +33,54 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         camera.position.set(120, 60, 0);
         camera.lookAt(scene.position);
         scene.add(camera);
+        renderer.shadowCameraFar = camera.far;
 
-        var material = Material(0x666666, 0.8, 0.3);
+        // var material = Material(0x666666, 0.8, 0.3);
 
         // making and adding lights
         var positions = [[0, 50, 20], [100, 200, 100]]
 
-        _.range(2)
-            .map( () => Light(0xffffff, 1) )
-            .map( (light, index) => {
-                light.position.set(...positions[index])
-                return light;
-            })
-            .forEach( light => scene.add(light));
+        // _.range(2)
+        //     .map( () => Light(0xffffff, 1) )
+        //     .map( (light, index) => {
+        //         light.position.set(...positions[index])
+        //         return light;
+        //     })
+        //     .forEach( light => scene.add(light));
+
+        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+        // directionalLight.position.set(0,1,0);
+        // directionalLight.castShadow = true;
+        // scene.add(directionalLight);
+
+        var spotLight = new THREE.SpotLight( 0xffffff );
+        spotLight.position.set( 100, 1000, 100 );
+
+        spotLight.castShadow = true;
+
+        spotLight.shadowMapWidth = 2056;
+        spotLight.shadowMapHeight = 2056;
+
+        spotLight.shadowCameraNear = 500;
+        spotLight.shadowCameraFar = 4000;
+        spotLight.shadowCameraFov = 30;
+
+        scene.add( spotLight );
 
 
         box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        box.castShadow = true;
 
-        // sphere = Sphere(3, material);
+        var planeGeo = new THREE.CylinderGeometry(0, 50, 10, 32);
 
-        var plane = new Physijs.CylinderMesh(
-            new THREE.CylinderGeometry(40, 40, 0.1, 32),
-            material,
+        var plane = new Physijs.ConeMesh(
+            planeGeo,
+            Material(0x666666, 0.8, 0.3),
             0
         )
 
         // var plane = Box(75, .1, 150, material, 0);
+        plane.receiveShadow = true;
 
 
         // plane.rotation.x = Math.PI/2;
@@ -83,31 +102,29 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
 
     var makeBall = function (socketId) {
         var thisSphere = new Ball();
+        thisSphere.castShadow = true;
         balls[socketId] = thisSphere;
         scene.add(thisSphere.ball);
     }
 
     // a new challenger appears!!
     Socket.on('newConnection', function (socketId) {
+        if (mobile) return;
         console.log('a new challenger appears!')
         makeBall(socketId);
     });
 
     // a challenger's phone has moved!
     Socket.on('updateOrientation', function (socketId, newOrientation) {
+        if (mobile) return;
         if (!balls[socketId]) {
             makeBall(socketId)
         }
         var thisBall = balls[socketId]
-        if (!thisBall.origAccel) {
-            thisBall.origAccel = {
-                x: newOrientation.beta,
-                z: newOrientation.gamma
-            }
-            console.log(thisBall);
-        }
-        thisBall.accel.x = -(thisBall.origAccel.x - newOrientation.beta);
-        thisBall.accel.z = (thisBall.origAccel.z - newOrientation.gamma);
+
+        thisBall.accel.x = 3 * newOrientation.beta;
+        thisBall.accel.z = 3 * -newOrientation.gamma;
+        thisBall.accel.y = -0.01
     });
 
     render = function () {
@@ -119,11 +136,9 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         requestAnimationFrame(render);
     };
 
-    if (!window.mobilecheck()){
+    if (!mobile){
         window.onload = initScene();
         balls = {};
-    } else {
-
     }
 
     return {}

@@ -1,8 +1,11 @@
 app.factory('Mobile', function (Socket, $modal) {
 
-
+    var Mobile = {};
 
     if (window.DeviceOrientationEvent && window.mobilecheck()) {
+
+        Mobile.isMobile = true;
+
         // var count = 0;
         window.addEventListener('deviceorientation', function (e) {
             var newPos = {
@@ -15,6 +18,8 @@ app.factory('Mobile', function (Socket, $modal) {
 
         });
     } else {
-        // not a mobile phone or no gyroscope support
+        Mobile.isMobile = false;// not a mobile phone or no gyroscope support
     }
+
+    return Mobile;
 });
