@@ -1,0 +1,20 @@
+@media screen and (max-width: 1200px) {
+  .container {
+    width: 100%;
+
+  }
+  .jumbotron {
+    padding: 10px;
+  }
+  .navbar {
+    border-radius: 4px;
+  }
+  .navbar-header {
+    float: left;
+  }
+  .navbar-nav > li > a {
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+}
+

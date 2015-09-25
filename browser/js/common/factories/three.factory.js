@@ -1,6 +1,6 @@
-/* global THREE Physijs */
+/* global THREE THREEx Physijs */
 
-app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
+app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
 
     var mobile = window.mobilecheck()
 
@@ -9,7 +9,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
     var initScene, render, renderer, scene, camera, box, sphere;
 
     var width = window.innerWidth;
-    var height = window.innerHeight - 97;
+    var height = window.innerHeight;
 
     initScene = function () {
         renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -23,10 +23,10 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         renderer.shadowMapWidth = 1024;
         renderer.shadowMapHeight = 1024;
         renderer.setSize(width, height);
-        document.getElementById('home').appendChild(renderer.domElement);
+        document.getElementById('game').appendChild(renderer.domElement);
 
         scene = new Physijs.Scene;
-        scene.setGravity(0, -30, 0);
+        scene.setGravity(new THREE.Vector3( 0, -50, 0 ))
 
         camera = new THREE.PerspectiveCamera(35, width / height, 1, 1000);
 
@@ -35,10 +35,12 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         scene.add(camera);
         renderer.shadowCameraFar = camera.far;
 
+        THREEx.WindowResize(renderer, camera);
+
         // var material = Material(0x666666, 0.8, 0.3);
 
         // making and adding lights
-        var positions = [[0, 50, 20], [100, 200, 100]]
+        // var positions = [[0, 50, 20], [100, 200, 100]]
 
         // _.range(2)
         //     .map( () => Light(0xffffff, 1) )
@@ -53,27 +55,41 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         // directionalLight.castShadow = true;
         // scene.add(directionalLight);
 
-        var spotLight = new THREE.SpotLight( 0xffffff );
-        spotLight.position.set( 100, 1000, 100 );
+        // var spotLight = new THREE.SpotLight( 0xffffff );
+        // spotLight.position.set( 100, 1000, 100 );
 
-        spotLight.castShadow = true;
+        // spotLight.castShadow = true;
 
-        spotLight.shadowMapWidth = 2056;
-        spotLight.shadowMapHeight = 2056;
+        // spotLight.shadowMapWidth = 2056;
+        // spotLight.shadowMapHeight = 2056;
 
-        spotLight.shadowCameraNear = 500;
-        spotLight.shadowCameraFar = 4000;
-        spotLight.shadowCameraFov = 30;
+        // spotLight.shadowCameraNear = 500;
+        // spotLight.shadowCameraFar = 4000;
+        // spotLight.shadowCameraFov = 30;
 
-        scene.add( spotLight );
+        // scene.add( spotLight );
+
+        var spotLight2 = new THREE.SpotLight( 0xffffff );
+        spotLight2.position.set( 800, 800, 800 );
+
+        spotLight2.castShadow = true;
+
+        spotLight2.shadowMapWidth = 2056;
+        spotLight2.shadowMapHeight = 2056;
+
+        spotLight2.shadowCameraNear = 500;
+        spotLight2.shadowCameraFar = 4000;
+        spotLight2.shadowCameraFov = 30;
+
+        scene.add( spotLight2 );
 
 
         box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
         box.castShadow = true;
 
-        var planeGeo = new THREE.CylinderGeometry(0, 50, 10, 32);
+        var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
 
-        var plane = new Physijs.ConeMesh(
+        var plane = new Physijs.CylinderMesh(
             planeGeo,
             Material(0x666666, 0.8, 0.3),
             0
@@ -100,18 +116,26 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         requestAnimationFrame(render);
     };
 
-    var makeBall = function (socketId) {
-        var thisSphere = new Ball();
+    var makeBall = function (socketId, phone) {
+        if (!phone) {
+            phone = {
+                name: "RandoPerson",
+                face: "gabe"
+            }
+        }
+        var thisSphere = new Ball(phone);
         thisSphere.castShadow = true;
         balls[socketId] = thisSphere;
+        thisSphere.socketId = socketId;
+        $rootScope.$broadcast('newBall', thisSphere);
         scene.add(thisSphere.ball);
     }
 
     // a new challenger appears!!
-    Socket.on('newConnection', function (socketId) {
+    Socket.on('newBallReady', function (socketId, phone) {
         if (mobile) return;
         console.log('a new challenger appears!')
-        makeBall(socketId);
+        makeBall(socketId, phone);
     });
 
     // a challenger's phone has moved!
@@ -122,14 +146,30 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         }
         var thisBall = balls[socketId]
 
-        thisBall.accel.x = 3 * newOrientation.beta;
-        thisBall.accel.z = 3 * -newOrientation.gamma;
-        thisBall.accel.y = -0.01
+        thisBall.accel.x = 2 * newOrientation.beta;
+        thisBall.accel.z = 2 * -newOrientation.gamma;
+    });
+
+    Socket.on('jump', function (socketId) {
+        if (mobile) return;
+        if (!balls[socketId]) {
+            makeBall(socketId)
+        }
+        var thisBall = balls[socketId]
+
+        thisBall.jump = true;
     });
 
     render = function () {
         _.forEach(balls, function (ball) {
-            ball.ball.applyCentralImpulse(ball.accel)
+            ball.ball.applyCentralImpulse(ball.accel);
+
+            if (ball.jump && ball.ball.position.y < 0) {
+
+                console.log('jumping! this is ball:', ball)
+                ball.ball.applyCentralImpulse({x:0, y: 2000, z: 0});
+                ball.jump = false;
+            }
         });
         scene.simulate();
         renderer.render(scene, camera);

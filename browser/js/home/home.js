@@ -8,7 +8,7 @@ app.config(function ($stateProvider) {
     });
 });
 
-app.controller('HomeCtrl', function ($scope, Socket, Three, Mobile, $modal) {
+app.controller('HomeCtrl', function ($scope, Socket) {
 
     Socket.on('connect', function () {
         console.log('connected via socket!')
@@ -26,8 +26,8 @@ app.controller('HomeCtrl', function ($scope, Socket, Three, Mobile, $modal) {
     //     });
 
     //     modalInstance.result
-    //     .then(function () {
-
+    //     .then(function (result) {
+    //         console.log(result);
     //     });
     // }
 

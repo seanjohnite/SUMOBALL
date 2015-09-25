@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <base href="/" />
     <title>SUMOBALL</title>
     <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.css" />
@@ -13,6 +16,7 @@
     <script src="/socket.io-client/socket.io.js"></script>
     <script src="/three/three.js"></script>
     <script src="/physijs/physi.js"></script>
+    <script src="/utils/window-resize.js"></script>
     <script>
         Physijs.scripts.worker = '/physijs/physijs_worker.js';
         Physijs.scripts.ammo = '/ammojs/builds/ammo.js';
@@ -25,7 +29,7 @@
     <script src="/main.js"></script>
 </head>
 <body ng-app="FullstackGeneratedApp">
-    <navbar></navbar>
+<!--     <navbar></navbar> -->
     <div id="main" ui-view></div>
 </body>
 </html>

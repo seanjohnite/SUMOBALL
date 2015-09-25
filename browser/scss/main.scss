@@ -4,6 +4,9 @@
 
 body {
   background: #fdfdfd;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 @mixin clearfix {
@@ -14,6 +17,10 @@ body {
   }
 }
 
+.container {
+  width: 1200px;
+}
+
 #main {
   width: 100%;
   margin: 0 auto;
@@ -22,3 +29,5 @@ body {
 @import 'directives/main';
 @import 'home/main';
 @import 'login/main';
+@import 'media-queries/main';
+@import 'game-stage/main';
