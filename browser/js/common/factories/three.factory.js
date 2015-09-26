@@ -1,7 +1,6 @@
 /* global THREE THREEx Physijs */
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
-
     // config
     var perspectiveOrOrtho = "ortho";
     var keepLooking = false;
@@ -133,7 +132,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
     });
 
     // good luck with this one, future Sean      (: |
-    var resolveGamma = function (ball, gamma) {
+    scene.resolveGamma = function (ball, gamma) {
         if (!ball.lastGamma) ball.lastGamma = gamma;
         if (!ball.flipped) ball.flipped = 0; // this will be -1, 0, or 1 depending on which way gamma flipped
         var thisGamma = gamma;
@@ -178,7 +177,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             return;
         }
         var thisBall = balls[socketId]
-        newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma)
+        newOrientation.gamma = scene.resolveGamma(thisBall, newOrientation.gamma);
 
         thisBall.accel = new THREE.Vector3(4 * newOrientation.gamma, -6, 4 * newOrientation.beta);
 
