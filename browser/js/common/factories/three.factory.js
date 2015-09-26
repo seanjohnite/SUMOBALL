@@ -2,7 +2,7 @@
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
     // config
-    var perspectiveOrOrtho = "perspective";
+    var perspectiveOrOrtho = "ortho";
     var keepLooking = false;
 
     // game is starting, close all prev sockets
@@ -12,7 +12,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
     var balls = {}
 
-    var initScene, render, renderer, scene, camera, box;
+    var initScene, render, renderer, scene, camera, box, ground, mesh;
 
     var wWidth = window.innerWidth;
     var wHeight = window.innerHeight;
@@ -74,25 +74,48 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
 
         box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
-        // box2 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
-        // box3 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
         box.castShadow = true;
+        console.log(box);
+        box.addEventListener('collision', function (other_object) {
+            console.log(`collision with ${other_object}!!`)
+        })
 
-        var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
+        mesh = new Physijs.SphereMesh(
+            new THREE.SphereGeometry( 3 ),
+            new THREE.MeshBasicMaterial({ color: 0x888888 })
+        );
+        mesh.addEventListener( 'collision', function( other_object, relative_velocity, relative_rotation, contact_normal ) {
+            console.log('fucking a')
+        });
+        mesh.position.set(0, 20, 0);
+        scene.add(mesh);
 
-        var plane = new Physijs.CylinderMesh(
-            planeGeo,
-            Material(0x666666, 0.8, 0.3),
-            0
-        )
+        // var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
+        var ground_material = Physijs.createMaterial(
+            new THREE.MeshLambertMaterial({ color: 0x888888 }),
+            .8, // high friction
+            .3 // low restitution
+        );
+        ground = new Physijs.BoxMesh(
+            new THREE.BoxGeometry(100, 1, 100),
+            ground_material,
+            0 // mass
+        );
+        ground.addEventListener( 'collision', function ( other_object, linear_velocity, angular_velocity ) {
+            console.log('wtf mate');
+            // `this` is the mesh with the event listener
+            // other_object is the object `this` collided with
+            // linear_velocity and angular_velocity are Vector3 objects which represent the velocity of the collision
+        });
 
         // var plane = Box(75, .1, 150, material, 0);
-        plane.receiveShadow = true;
+        ground.receiveShadow = true;
 
 
         // plane.rotation.x = Math.PI/2;
 
-        plane.position.set(0, -10, 0);
+        ground.position.set(0, -10, 0);
+        scene.add(ground);
 
         box.position.set(-10, 0, 0);
         // box2.position.set(0, 0, 0);
@@ -104,7 +127,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
         scene.add(box);
         // scene.add(sphere);
-        scene.add(plane);
+        // scene.add(plane);
 
         requestAnimationFrame(render);
     };
@@ -120,7 +143,11 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         thisSphere.castShadow = true;
         balls[socketId] = thisSphere;
         thisSphere.socketId = socketId;
+        console.log(thisSphere);
         $rootScope.$broadcast('newBall', thisSphere);
+        thisSphere.ball.addEventListener('collision', function () {
+            console.log('totally just ran into somethin!!')
+        })
         scene.add(thisSphere.ball);
     }
 
@@ -202,6 +229,8 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         delete balls[socketId];
     });
 
+    var count = 0;
+
     render = function () {
         var keepOne;
         _.forEach(balls, function (ball) {
@@ -225,7 +254,6 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             }
 
         }
-
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     };

@@ -7,12 +7,12 @@ app.factory('Material', function () {
     var Material = function (hexColor, friction, restitution, imgFile) {
         var material;
         if (imgFile) {
-            material = new THREE.MeshPhongMaterial({
+            material = new THREE.MeshLambertMaterial({
                 reflectivity: .5,
                 map: new THREE.ImageUtils.loadTexture(imgFile)
             })
         } else {
-            material = new THREE.MeshPhongMaterial({
+            material = new THREE.MeshLambertMaterial({
                 color: hexColor,
                 reflectivity: .7,
             });
