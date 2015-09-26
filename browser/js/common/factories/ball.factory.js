@@ -27,7 +27,7 @@ app.factory('Ball', function (Sphere, Material, Images) {
             z: 0
         };
 
-        this.ball = Sphere(4, Material(this.color, 0.9, 0.6, Images[this.face]));
+        this.ball = Sphere(4, Material(this.color, 0.9, 0.6, this.face));
         this.ball.castShadow = true;
     }
 

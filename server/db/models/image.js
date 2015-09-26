@@ -3,11 +3,15 @@ var mongoose = require('mongoose');
 
 var schema = new mongoose.Schema({
 
-    path: {
+    route: {
+        type: String
+    },
+    fullPath: {
         type: String
     },
     name: {
-        type: String
+        type: String,
+        unique: true
     }
 });
 

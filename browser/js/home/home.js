@@ -18,19 +18,11 @@ app.controller('HomeCtrl', function ($scope, Socket) {
         Socket.emit('newUser', user);
     }
 
-    // if (Mobile.isMobile) {
-    //     var modalInstance = $modal.open({
-    //         animation: false,
-    //         templateUrl: '/js/common/modals/start.modal.html',
-    //         size: 'sm'
-    //     });
-
-    //     modalInstance.result
-    //     .then(function (result) {
-    //         console.log(result);
-    //     });
-    // }
-
+    $scope.limits = {
+        phones: 0,
+        platforms: 0,
+        computers: 0
+    }
 
     if (window.mobilecheck()) {
         $scope.mobile = true;

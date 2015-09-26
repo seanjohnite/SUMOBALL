@@ -14,6 +14,10 @@ module.exports = function (server) {
             socket.broadcast.emit('closeYoSocket');
         })
 
+        socket.on('platformer', function () {
+            socket.broadcast.emit('platformStart');
+        })
+
         socket.on('newChallenger', function (phone) {
             socket.broadcast.emit('newBallReady', socket.id, phone);
         })

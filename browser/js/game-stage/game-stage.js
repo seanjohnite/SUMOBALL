@@ -8,7 +8,7 @@ app.config(function ($stateProvider) {
                 $scope.balls[ball.socketId] = {
                     ball: ball.ball,
                     socketId: ball.socketId,
-                    photo: Images[ball.face],
+                    photo: ball.face,
                     name: ball.name,
                     start: new Date(),
                     timeIn: 0

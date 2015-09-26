@@ -2,7 +2,7 @@
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
     // config
-    var perspectiveOrOrtho = "ortho";
+    var perspectiveOrOrtho = "perspective";
     var keepLooking = false;
 
     // game is starting, close all prev sockets
@@ -132,7 +132,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
     });
 
     // good luck with this one, future Sean      (: |
-    scene.resolveGamma = function (ball, gamma) {
+    var resolveGamma = function (ball, gamma) {
         if (!ball.lastGamma) ball.lastGamma = gamma;
         if (!ball.flipped) ball.flipped = 0; // this will be -1, 0, or 1 depending on which way gamma flipped
         var thisGamma = gamma;
@@ -177,7 +177,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             return;
         }
         var thisBall = balls[socketId]
-        newOrientation.gamma = scene.resolveGamma(thisBall, newOrientation.gamma);
+        newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma);
 
         thisBall.accel = new THREE.Vector3(4 * newOrientation.gamma, -6, 4 * newOrientation.beta);
 
@@ -189,8 +189,8 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             makeBall(socketId)
         }
         var thisBall = balls[socketId]
-
-        thisBall.jump = true;
+        if (thisBall.jump) thisBall.jump--;
+        else thisBall.jump = 10;
     });
 
     $rootScope.$on('removeBall', function (e, socketId) {
@@ -205,17 +205,18 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             }
             keepOne = ball;
             if (ball.jump && ball.ball.position.y < 0) {
-                ball.ball.applyCentralImpulse({x:0, y: 4000, z: 0});
-                ball.jump = false;
+                ball.ball.applyCentralImpulse({x:0, y: ball.jump * 300, z: 0});
+                ball.jump--;
             }
         });
         scene.simulate();
         if (keepOne && keepLooking) {
             if (perspectiveOrOrtho === "perspective") {
-                camera.lookAt(keepOne.ball.position);
+                camera.position.set(0 + keepOne.ball.position.x, 60 + keepOne.ball.position.y, 120 + keepOne.ball.position.z);
+                // camera.lookAt(keepOne.ball.position); (same cam position keep looking)
             } else {
                 // ortho keep looking
-                camera.position.set(40 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 0 + keepOne.ball.position.z);
+                camera.position.set(0 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 40 + keepOne.ball.position.z);
             }
 
         }

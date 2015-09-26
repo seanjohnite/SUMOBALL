@@ -2,13 +2,47 @@ app.config(function ($stateProvider) {
     $stateProvider.state('mobile', {
         url: '/mobile',
         templateUrl: '/js/mobile/mobile.html',
-        controller: 'MobileCtrl'
+        controller: 'MobileCtrl',
+        resolve: {
+            images: function (Images) {
+                return Images.getAll();
+            }
+        }
     });
 });
 
-app.controller('MobileCtrl', function ($scope, Images, Socket, $state) {
+app.controller('MobileCtrl', function ($scope, images, Socket, $state, Upload, Images) {
+    $scope.images = images;
+    // upload later on form submit or something similar
+    $scope.submit = function() {
+      if ($scope.file && !$scope.file.$error) {
+        $scope.upload($scope.file);
+      }
+    };
+
+    // upload on file select or drop
+    $scope.upload = function (file) {
+        Upload.upload({
+            url: 'api/images',
+            fields: {'name': $scope.imageName},
+            file: file
+        }).progress(function (evt) {
+            var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+            console.log('progress: ' + progressPercentage + '% ' + evt.config.file.name);
+        }).success(function (data, status, headers, config) {
+            console.log('file ' + config.file.name + ' uploaded. Response: ' + data);
+            Images.getAll().then(function (images) {
+                $scope.images = images;
+                $scope.phone.name = $scope.imageName;
+                $scope.phone.face = data.route;
+            });
+        }).error(function (data, status, headers, config) {
+            console.log('error status: ' + status);
+        })
+    };
+
+
     $scope.phone = {};
-    $scope.images = Object.keys(Images);
 
     Socket.on('closeYoSocket', function () {
         Socket.disconnect();
