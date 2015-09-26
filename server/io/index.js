@@ -10,6 +10,10 @@ module.exports = function (server) {
 
     io.on('connection', function (socket) {
 
+        socket.on('newGameStarting', function () {
+            socket.broadcast.emit('closeYoSocket');
+        })
+
         socket.on('newChallenger', function (phone) {
             socket.broadcast.emit('newBallReady', socket.id, phone);
         })

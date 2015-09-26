@@ -2,7 +2,7 @@ app.config(function ($stateProvider) {
     $stateProvider.state('gameStage', {
         url: '/game-stage',
         templateUrl: '/js/game-stage/game-stage.html',
-        controller: function ($scope, Images, Socket, Three, $interval) {
+        controller: function ($scope, Images, Socket, Three, $interval, $rootScope) {
             $scope.balls = {};
             $scope.$on('newBall', function (e, ball) {
                 $scope.balls[ball.socketId] = {
@@ -13,7 +13,6 @@ app.config(function ($stateProvider) {
                     start: new Date(),
                     timeIn: 0
                 };
-                console.log($scope.balls);
                 $scope.$digest();
             });
             $scope.currentTime = new Date();
@@ -21,11 +20,11 @@ app.config(function ($stateProvider) {
                 $scope.currentTime = new Date();
                 _.forEach($scope.balls, function (ball) {
                     ball.timeIn = $scope.currentTime - ball.start;
-                    console.log(ball.ball.position.y, ball.socketId);
                     if (ball.ball.position.y < -5) {
+                        $rootScope.$broadcast('removeBall', ball.socketId);
                         delete $scope.balls[ball.socketId];
+                        Three.remove(ball.ball);
                     }
-                    console.log($scope.balls);
                 });
             }, 1000)
         }

@@ -2,14 +2,21 @@
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
 
+    // config
+    var perspectiveOrOrtho = "perspective";
+    var keepLooking = false;
+
+    // game is starting, close all prev sockets
+    Socket.emit('newGameStarting');
+
     var mobile = window.mobilecheck()
 
     var balls = {}
 
-    var initScene, render, renderer, scene, camera, box, sphere;
+    var initScene, render, renderer, scene, camera, box, sphere, box2, box3;
 
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    var wWidth = window.innerWidth;
+    var wHeight = window.innerHeight;
 
     initScene = function () {
         renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -22,52 +29,35 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         renderer.shadowMapDarkness = 1;
         renderer.shadowMapWidth = 1024;
         renderer.shadowMapHeight = 1024;
-        renderer.setSize(width, height);
+        renderer.setSize(wWidth, wHeight);
         document.getElementById('game').appendChild(renderer.domElement);
 
         scene = new Physijs.Scene;
         scene.setGravity(new THREE.Vector3( 0, -50, 0 ))
 
-        camera = new THREE.PerspectiveCamera(35, width / height, 1, 1000);
+        if (perspectiveOrOrtho === "ortho") {
+            var aspectRatio = wWidth / wHeight;
+            var height = 100;
+            var width = aspectRatio * height;
+            camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+            camera.position.set(40, 30, 0);
+        }
 
-        camera.position.set(120, 60, 0);
+        if (perspectiveOrOrtho === "perspective") {
+            camera = new THREE.PerspectiveCamera(35, wWidth / wHeight, 1, 1000);
+            camera.position.set(120, 60, 0);
+        }
+
         camera.lookAt(scene.position);
-        scene.add(camera);
+
+
+        scene.add( camera );
+        // scene.add(camera);
         renderer.shadowCameraFar = camera.far;
 
         THREEx.WindowResize(renderer, camera);
 
-        // var material = Material(0x666666, 0.8, 0.3);
 
-        // making and adding lights
-        // var positions = [[0, 50, 20], [100, 200, 100]]
-
-        // _.range(2)
-        //     .map( () => Light(0xffffff, 1) )
-        //     .map( (light, index) => {
-        //         light.position.set(...positions[index])
-        //         return light;
-        //     })
-        //     .forEach( light => scene.add(light));
-
-        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-        // directionalLight.position.set(0,1,0);
-        // directionalLight.castShadow = true;
-        // scene.add(directionalLight);
-
-        // var spotLight = new THREE.SpotLight( 0xffffff );
-        // spotLight.position.set( 100, 1000, 100 );
-
-        // spotLight.castShadow = true;
-
-        // spotLight.shadowMapWidth = 2056;
-        // spotLight.shadowMapHeight = 2056;
-
-        // spotLight.shadowCameraNear = 500;
-        // spotLight.shadowCameraFar = 4000;
-        // spotLight.shadowCameraFov = 30;
-
-        // scene.add( spotLight );
 
         var spotLight2 = new THREE.SpotLight( 0xffffff );
         spotLight2.position.set( 800, 800, 800 );
@@ -85,6 +75,8 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
 
         box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        // box2 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        // box3 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
         box.castShadow = true;
 
         var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
@@ -103,7 +95,9 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
         plane.position.set(0, -10, 0);
 
-        box.position.set(0, 0, 0);
+        box.position.set(-10, 0, 0);
+        // box2.position.set(0, 0, 0);
+        // box3.position.set(10, 0, 0);
         // sphere.position.set(0, 20, 0);
 
         box.rotation.y = .6;
@@ -142,12 +136,13 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
     Socket.on('updateOrientation', function (socketId, newOrientation) {
         if (mobile) return;
         if (!balls[socketId]) {
-            makeBall(socketId)
+            return;
         }
         var thisBall = balls[socketId]
 
-        thisBall.accel.x = 2 * newOrientation.beta;
-        thisBall.accel.z = 2 * -newOrientation.gamma;
+        thisBall.accel.x = 3 * newOrientation.beta;
+        thisBall.accel.z = 3 * -newOrientation.gamma;
+        thisBall.accel.y = -6;
     });
 
     Socket.on('jump', function (socketId) {
@@ -160,18 +155,33 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         thisBall.jump = true;
     });
 
+    $rootScope.$on('removeBall', function (e, socketId) {
+        delete balls[socketId];
+    });
+
     render = function () {
+        var keepOne;
         _.forEach(balls, function (ball) {
-            ball.ball.applyCentralImpulse(ball.accel);
-
+            if (ball.ball && ball.ball.position.y < 0) {
+                ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
+            }
+            keepOne = ball;
             if (ball.jump && ball.ball.position.y < 0) {
-
-                console.log('jumping! this is ball:', ball)
                 ball.ball.applyCentralImpulse({x:0, y: 2000, z: 0});
                 ball.jump = false;
             }
         });
         scene.simulate();
+        if (keepOne && keepLooking) {
+            if (perspectiveOrOrtho === "perspective") {
+                camera.lookAt(keepOne.ball.position);
+            } else {
+                // ortho keep looking
+                camera.position.set(40 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 0 + keepOne.ball.position.z);
+            }
+
+        }
+
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     };
@@ -181,6 +191,6 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         balls = {};
     }
 
-    return {}
+    return scene;
 
 })

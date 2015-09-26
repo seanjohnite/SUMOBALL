@@ -10,6 +10,10 @@ app.controller('MobileCtrl', function ($scope, Images, Socket, $state) {
     $scope.phone = {};
     $scope.images = Object.keys(Images);
 
+    Socket.on('closeYoSocket', function () {
+        Socket.disconnect();
+    });
+
     $scope.ready = function (phone) {
         Socket.emit('newChallenger', phone)
 
