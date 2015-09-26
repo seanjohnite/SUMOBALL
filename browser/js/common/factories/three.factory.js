@@ -3,7 +3,7 @@
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
 
     // config
-    var perspectiveOrOrtho = "perspective";
+    var perspectiveOrOrtho = "ortho";
     var keepLooking = false;
 
     // game is starting, close all prev sockets
@@ -13,7 +13,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
     var balls = {}
 
-    var initScene, render, renderer, scene, camera, box, sphere, box2, box3;
+    var initScene, render, renderer, scene, camera, box;
 
     var wWidth = window.innerWidth;
     var wHeight = window.innerHeight;
@@ -40,12 +40,12 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             var height = 100;
             var width = aspectRatio * height;
             camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-            camera.position.set(40, 30, 0);
+            camera.position.set(0, 30, 40);
         }
 
         if (perspectiveOrOrtho === "perspective") {
             camera = new THREE.PerspectiveCamera(35, wWidth / wHeight, 1, 1000);
-            camera.position.set(120, 60, 0);
+            camera.position.set(0, 60, 120);
         }
 
         camera.lookAt(scene.position);
@@ -132,6 +132,45 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         makeBall(socketId, phone);
     });
 
+    // good luck with this one, future Sean      (: |
+    var resolveGamma = function (ball, gamma) {
+        if (!ball.lastGamma) ball.lastGamma = gamma;
+        if (!ball.flipped) ball.flipped = 0; // this will be -1, 0, or 1 depending on which way gamma flipped
+        var thisGamma = gamma;
+
+        if (gamma - ball.lastGamma > 170 || ball.flipped === 1) {
+            gamma -= 180;
+            if (ball.flipped !== 1) {
+                ball.flipped += 1;
+
+            }
+            if (ball.lastGamma - gamma > 170 || ball.flipped === -1) {
+                gamma += 180;
+                if (ball.flipped !== -1) {
+                    ball.flipped -= 1;
+                }
+            }
+        }
+
+        if (ball.lastGamma - gamma > 170 || ball.flipped === -1) {
+            gamma += 180;
+            if (ball.flipped !== -1) {
+                ball.flipped -= 1;
+
+            }
+            if (ball.lastGamma + gamma > 350 || ball.flipped === 1) {
+                gamma -= 180;
+                if (ball.flipped !== 1) {
+                    ball.flipped += 1;
+                }
+            }
+        }
+
+        ball.lastGamma = gamma;
+
+        return gamma;
+    };
+
     // a challenger's phone has moved!
     Socket.on('updateOrientation', function (socketId, newOrientation) {
         if (mobile) return;
@@ -139,10 +178,10 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             return;
         }
         var thisBall = balls[socketId]
+        newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma)
 
-        thisBall.accel.x = 3 * newOrientation.beta;
-        thisBall.accel.z = 3 * -newOrientation.gamma;
-        thisBall.accel.y = -6;
+        thisBall.accel = new THREE.Vector3(4 * newOrientation.gamma, -6, 4 * newOrientation.beta);
+
     });
 
     Socket.on('jump', function (socketId) {
@@ -167,7 +206,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             }
             keepOne = ball;
             if (ball.jump && ball.ball.position.y < 0) {
-                ball.ball.applyCentralImpulse({x:0, y: 2000, z: 0});
+                ball.ball.applyCentralImpulse({x:0, y: 4000, z: 0});
                 ball.jump = false;
             }
         });
