@@ -182,9 +182,6 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
         thisBall.accel = new THREE.Vector3(4 * newOrientation.gamma, -6, 4 * newOrientation.beta);
 
-        // thisBall.accel.x = 3 * newOrientation.beta;
-        // thisBall.accel.z = 3 * -newOrientation.gamma;
-        // thisBall.accel.y = -6;
     });
 
     Socket.on('jump', function (socketId) {
