@@ -9,12 +9,24 @@ module.exports = function (server) {
     io = socketio(server);
 
     io.on('connection', function (socket) {
-        socket.broadcast.emit('newConnection', socket.id);
+
+        socket.on('newGameStarting', function () {
+            socket.broadcast.emit('closeYoSocket');
+        })
+
+        socket.on('newChallenger', function (phone) {
+            socket.broadcast.emit('newBallReady', socket.id, phone);
+        })
 
         console.log('connected to', socket.id);
         socket.on('changeOrientation', function (newOrientation) {
             socket.broadcast.emit('updateOrientation', socket.id, newOrientation);
         });
+
+        socket.on('changeMotion', function (e) {
+            socket.broadcast.emit('jump', socket.id);
+        });
+
     });
 
     return io;

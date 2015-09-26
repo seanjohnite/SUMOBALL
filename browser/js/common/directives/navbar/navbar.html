@@ -1,16 +1,36 @@
-<nav class="navbar navbar-static-top">
-    <div class="container">
+      <div class="container">
+<nav class="navbar navbar-inverse">
         <div class="navbar-header">
+          <a class="navbar-brand" href="#">SUMOBALL</a>
+        </div>
+        <div id="navbar">
+          <ul class="nav navbar-nav">
+            <li ng-repeat="item in items">
+                <a ui-sref-active="active" ui-sref="{{ item.state }}">{{ item.label }}</a>
+            </li>
+        </ul>
+        </div><!--/.nav-collapse -->
+    </nav>
+      </div>
+
+
+<!-- <div class="container">
+    <nav class="navbar navbar-inverse">
+        <div class="navbar-header">
+            <a class="navbar-brand"
+                ui-sref="home">SUMOBALL</a>
         </div>
         <ul class="nav navbar-nav">
             <li ng-repeat="item in items" ng-show="!item.auth || isLoggedIn()">
                 <a ui-sref-active="active" ui-sref="{{ item.state }}">{{ item.label }}</a>
             </li>
         </ul>
-        <button ng-show="!user" ui-sref="login" class="btn login-button">Login</button>
+        <div class="nav navbar-nav navbar-right">
+            <button ng-show="!user" ui-sref="login" class="btn btn-default">Login</button>
+        </div>
         <div ng-show="user" class="welcome">
             <span>Welcome, {{ user.email }}!</span>
             <a ng-click="logout()">Logout</a>
         </div>
-    </div>
-</nav>
+    </nav>
+</div> -->

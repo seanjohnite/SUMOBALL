@@ -1,15 +1,22 @@
-/* global THREE Physijs */
+/* global THREE THREEx Physijs */
 
-app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
+app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
+
+    // config
+    var perspectiveOrOrtho = "perspective";
+    var keepLooking = false;
+
+    // game is starting, close all prev sockets
+    Socket.emit('newGameStarting');
 
     var mobile = window.mobilecheck()
 
     var balls = {}
 
-    var initScene, render, renderer, scene, camera, box, sphere;
+    var initScene, render, renderer, scene, camera, box, sphere, box2, box3;
 
-    var width = window.innerWidth;
-    var height = window.innerHeight - 97;
+    var wWidth = window.innerWidth;
+    var wHeight = window.innerHeight;
 
     initScene = function () {
         renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -22,58 +29,59 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         renderer.shadowMapDarkness = 1;
         renderer.shadowMapWidth = 1024;
         renderer.shadowMapHeight = 1024;
-        renderer.setSize(width, height);
-        document.getElementById('home').appendChild(renderer.domElement);
+        renderer.setSize(wWidth, wHeight);
+        document.getElementById('game').appendChild(renderer.domElement);
 
         scene = new Physijs.Scene;
-        scene.setGravity(0, -30, 0);
+        scene.setGravity(new THREE.Vector3( 0, -50, 0 ))
 
-        camera = new THREE.PerspectiveCamera(35, width / height, 1, 1000);
+        if (perspectiveOrOrtho === "ortho") {
+            var aspectRatio = wWidth / wHeight;
+            var height = 100;
+            var width = aspectRatio * height;
+            camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+            camera.position.set(40, 30, 0);
+        }
 
-        camera.position.set(120, 60, 0);
+        if (perspectiveOrOrtho === "perspective") {
+            camera = new THREE.PerspectiveCamera(35, wWidth / wHeight, 1, 1000);
+            camera.position.set(120, 60, 0);
+        }
+
         camera.lookAt(scene.position);
-        scene.add(camera);
+
+
+        scene.add( camera );
+        // scene.add(camera);
         renderer.shadowCameraFar = camera.far;
 
-        // var material = Material(0x666666, 0.8, 0.3);
+        THREEx.WindowResize(renderer, camera);
 
-        // making and adding lights
-        var positions = [[0, 50, 20], [100, 200, 100]]
 
-        // _.range(2)
-        //     .map( () => Light(0xffffff, 1) )
-        //     .map( (light, index) => {
-        //         light.position.set(...positions[index])
-        //         return light;
-        //     })
-        //     .forEach( light => scene.add(light));
 
-        // var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
-        // directionalLight.position.set(0,1,0);
-        // directionalLight.castShadow = true;
-        // scene.add(directionalLight);
+        var spotLight2 = new THREE.SpotLight( 0xffffff );
+        spotLight2.position.set( 800, 800, 800 );
 
-        var spotLight = new THREE.SpotLight( 0xffffff );
-        spotLight.position.set( 100, 1000, 100 );
+        spotLight2.castShadow = true;
 
-        spotLight.castShadow = true;
+        spotLight2.shadowMapWidth = 2056;
+        spotLight2.shadowMapHeight = 2056;
 
-        spotLight.shadowMapWidth = 2056;
-        spotLight.shadowMapHeight = 2056;
+        spotLight2.shadowCameraNear = 500;
+        spotLight2.shadowCameraFar = 4000;
+        spotLight2.shadowCameraFov = 30;
 
-        spotLight.shadowCameraNear = 500;
-        spotLight.shadowCameraFar = 4000;
-        spotLight.shadowCameraFov = 30;
-
-        scene.add( spotLight );
+        scene.add( spotLight2 );
 
 
         box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        // box2 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        // box3 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
         box.castShadow = true;
 
-        var planeGeo = new THREE.CylinderGeometry(0, 50, 10, 32);
+        var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
 
-        var plane = new Physijs.ConeMesh(
+        var plane = new Physijs.CylinderMesh(
             planeGeo,
             Material(0x666666, 0.8, 0.3),
             0
@@ -87,7 +95,9 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
 
         plane.position.set(0, -10, 0);
 
-        box.position.set(0, 0, 0);
+        box.position.set(-10, 0, 0);
+        // box2.position.set(0, 0, 0);
+        // box3.position.set(10, 0, 0);
         // sphere.position.set(0, 20, 0);
 
         box.rotation.y = .6;
@@ -100,38 +110,78 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         requestAnimationFrame(render);
     };
 
-    var makeBall = function (socketId) {
-        var thisSphere = new Ball();
+    var makeBall = function (socketId, phone) {
+        if (!phone) {
+            phone = {
+                name: "RandoPerson",
+                face: "gabe"
+            }
+        }
+        var thisSphere = new Ball(phone);
         thisSphere.castShadow = true;
         balls[socketId] = thisSphere;
+        thisSphere.socketId = socketId;
+        $rootScope.$broadcast('newBall', thisSphere);
         scene.add(thisSphere.ball);
     }
 
     // a new challenger appears!!
-    Socket.on('newConnection', function (socketId) {
+    Socket.on('newBallReady', function (socketId, phone) {
         if (mobile) return;
         console.log('a new challenger appears!')
-        makeBall(socketId);
+        makeBall(socketId, phone);
     });
 
     // a challenger's phone has moved!
     Socket.on('updateOrientation', function (socketId, newOrientation) {
         if (mobile) return;
         if (!balls[socketId]) {
-            makeBall(socketId)
+            return;
         }
         var thisBall = balls[socketId]
 
         thisBall.accel.x = 3 * newOrientation.beta;
         thisBall.accel.z = 3 * -newOrientation.gamma;
-        thisBall.accel.y = -0.01
+        thisBall.accel.y = -6;
+    });
+
+    Socket.on('jump', function (socketId) {
+        if (mobile) return;
+        if (!balls[socketId]) {
+            makeBall(socketId)
+        }
+        var thisBall = balls[socketId]
+
+        thisBall.jump = true;
+    });
+
+    $rootScope.$on('removeBall', function (e, socketId) {
+        delete balls[socketId];
     });
 
     render = function () {
+        var keepOne;
         _.forEach(balls, function (ball) {
-            ball.ball.applyCentralImpulse(ball.accel)
+            if (ball.ball && ball.ball.position.y < 0) {
+                ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
+            }
+            keepOne = ball;
+            if (ball.jump && ball.ball.position.y < 0) {
+                ball.ball.applyCentralImpulse({x:0, y: 2000, z: 0});
+                ball.jump = false;
+            }
         });
         scene.simulate();
+        if (keepOne && keepLooking) {
+            if (perspectiveOrOrtho === "perspective") {
+                camera.lookAt(keepOne.ball.position);
+            } else {
+                // ortho keep looking
+                camera.position.set(40 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 0 + keepOne.ball.position.z);
+            }
+
+        }
+
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     };
@@ -141,6 +191,6 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball) {
         balls = {};
     }
 
-    return {}
+    return scene;
 
 })

@@ -17,7 +17,6 @@ app.factory('Material', function () {
                 reflectivity: .7,
             });
         }
-        console.log(material);
         return Physijs.createMaterial(
             material,
             friction, // .8 is high friction
