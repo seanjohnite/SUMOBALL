@@ -193,6 +193,11 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         else thisBall.jump = 10;
     });
 
+    var platform = true;
+    Socket.on('platformStart', function () {
+
+    });
+
     $rootScope.$on('removeBall', function (e, socketId) {
         delete balls[socketId];
     });

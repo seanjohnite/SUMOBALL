@@ -5,6 +5,7 @@ app.config(function ($stateProvider) {
         controller: function ($scope, Images, Socket, Three, $interval, $rootScope) {
             $scope.renderer;
             $scope.scene;
+            $scope.lastEdge = ;
 
             $scope.init = function () {
 
