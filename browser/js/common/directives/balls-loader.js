@@ -1,4 +1,4 @@
-app.directive('ballLoader', function (Socket, Ball) {
+app.directive('ballsLoader', function (Socket, Ball) {
     return {
         restrict: 'E',
         link: function (scope) {
@@ -13,24 +13,36 @@ app.directive('ballLoader', function (Socket, Ball) {
                 var thisSphere = new Ball(phone);
                 thisSphere.castShadow = true;
                 thisSphere.socketId = socketId;
+                thisSphere.start = new Date();
+                thisSphere.timeIn = 0;
                 console.log(thisSphere);
                 return thisSphere;
             }
 
-            Socket.on('readyAdventure', function (socketId, phone) {
+            Socket.on('newBallReady', function (socketId, phone) {
+                console.log('received newBallReady event')
                 var ball = makeBall(socketId, phone);
-                scope.threeObj.ball = ball;
+                scope.threeObj.balls[socketId] = ball;
                 ball.ball.position.set(0, 20, 0);
                 scope.threeObj.scene.add(ball.ball);
             });
 
             Socket.on('updateOrientation', function (socketId, newOrientation) {
-                if (!scope.threeObj.ball) {
+                if (!scope.threeObj.balls[socketId]) {
                     return;
                 }
-                newOrientation.gamma = resolveGamma(scope.threeObj.ball, newOrientation.gamma);
+                newOrientation.gamma = resolveGamma(scope.threeObj.balls[socketId], newOrientation.gamma);
 
-                scope.threeObj.accel = new THREE.Vector3(1000 * newOrientation.beta, 0, 1000 * -newOrientation.gamma);
+                scope.threeObj.balls[socketId].accel = new THREE.Vector3(1600 * newOrientation.beta, 0, 1600 * -newOrientation.gamma);
+            });
+
+            Socket.on('jump', function (socketId) {
+                if (!scope.threeObj.balls[socketId]) {
+                    return;
+                }
+                var thisBall = scope.threeObj.balls[socketId];
+                if (thisBall.jump) thisBall.jump--;
+                else thisBall.jump = 10;
             });
 
             var resolveGamma = function (ball, gamma) {

@@ -5,12 +5,12 @@ app.directive('roundPlatform', function (Material) {
     return {
         restrict: 'E',
         link: function (scope, element, attrs) {
-            console.log("adding round platform")
+            var color = scope.threeObj.colors[Math.floor(Math.random() * scope.threeObj.colors.length)]
             var discRad = Number(attrs.width);
             var planeGeo = new THREE.CylinderGeometry(discRad, discRad, 5, 32);
             var round = new Physijs.CylinderMesh(
                 planeGeo,
-                Material(0xffffff, 0.8, 0.3),
+                Material(color, 0.8, 0.3),
                 0
             )
             round.receiveShadow = true;

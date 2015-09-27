@@ -15,6 +15,7 @@ module.exports = function (server) {
         console.log('connected to', socket.id);
 
         socket.on('newGameStarting', function () {
+            console.log('received newgame event')
             stages.push(socket.id);
             socket.broadcast.emit('closeYoSocket');
         });
@@ -43,6 +44,7 @@ module.exports = function (server) {
         })
 
         socket.on('newChallenger', function (phone) {
+            console.log('received newChallenger event')
             _.forEach(stages, function (stageSocketId) {
                 io.to(stageSocketId).emit('newBallReady', socket.id, phone)
             });
