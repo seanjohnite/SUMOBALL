@@ -1,9 +1,8 @@
 /* global THREE THREEx Physijs */
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
-
     // config
-    var perspectiveOrOrtho = "ortho";
+    var perspectiveOrOrtho = "perspective";
     var keepLooking = false;
 
     // game is starting, close all prev sockets
@@ -13,7 +12,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
     var balls = {}
 
-    var initScene, render, renderer, scene, camera, box;
+    var initScene, render, renderer, scene, camera, box, ground, mesh;
 
     var wWidth = window.innerWidth;
     var wHeight = window.innerHeight;
@@ -33,7 +32,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         document.getElementById('game').appendChild(renderer.domElement);
 
         scene = new Physijs.Scene;
-        scene.setGravity(new THREE.Vector3( 0, -50, 0 ))
+        scene.setGravity(new THREE.Vector3( 0, -80, 0 ))
 
         if (perspectiveOrOrtho === "ortho") {
             var aspectRatio = wWidth / wHeight;
@@ -74,26 +73,29 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         scene.add( spotLight2 );
 
 
-        box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
-        // box2 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
-        // box3 = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.8));
         box.castShadow = true;
 
-        var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
-
-        var plane = new Physijs.CylinderMesh(
+        var planeGeo = new THREE.CylinderGeometry(40, 40, 3, 32);
+        var ground_material = Physijs.createMaterial(
+            new THREE.MeshLambertMaterial({ color: 0x888888 }),
+            1, // high friction
+            .1 // low restitution
+        );
+        ground = new Physijs.CylinderMesh(
             planeGeo,
-            Material(0x666666, 0.8, 0.3),
-            0
-        )
+            ground_material,
+            0 // mass
+        );
 
         // var plane = Box(75, .1, 150, material, 0);
-        plane.receiveShadow = true;
+        ground.receiveShadow = true;
 
 
         // plane.rotation.x = Math.PI/2;
 
-        plane.position.set(0, -10, 0);
+        ground.position.set(0, -10, 0);
+        scene.add(ground);
 
         box.position.set(-10, 0, 0);
         // box2.position.set(0, 0, 0);
@@ -105,7 +107,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
         scene.add(box);
         // scene.add(sphere);
-        scene.add(plane);
+        // scene.add(plane);
 
         requestAnimationFrame(render);
     };
@@ -114,13 +116,14 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         if (!phone) {
             phone = {
                 name: "RandoPerson",
-                face: "gabe"
+                face: "/images/gabriel_lebec@2x.jpg"
             }
         }
         var thisSphere = new Ball(phone);
         thisSphere.castShadow = true;
         balls[socketId] = thisSphere;
         thisSphere.socketId = socketId;
+        console.log(thisSphere);
         $rootScope.$broadcast('newBall', thisSphere);
         scene.add(thisSphere.ball);
     }
@@ -178,9 +181,11 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             return;
         }
         var thisBall = balls[socketId]
-        newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma)
+        newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma);
 
-        thisBall.accel = new THREE.Vector3(4 * newOrientation.gamma, -6, 4 * newOrientation.beta);
+        // console.log(thisBall.ball._physijs.linearVelocity.length());
+
+        thisBall.accel = new THREE.Vector3(1600 * newOrientation.beta, 0, 1600 * -newOrientation.gamma);
 
     });
 
@@ -190,37 +195,43 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             makeBall(socketId)
         }
         var thisBall = balls[socketId]
-
-        thisBall.jump = true;
+        if (thisBall.jump) thisBall.jump--;
+        else thisBall.jump = 10;
     });
+
+
 
     $rootScope.$on('removeBall', function (e, socketId) {
         delete balls[socketId];
     });
 
+
     render = function () {
         var keepOne;
         _.forEach(balls, function (ball) {
-            if (ball.ball && ball.ball.position.y < 0) {
-                ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
+            var touchingGround = (ball.ball._physijs.touches.indexOf(ground._physijs.id) > -1);
+            if (ball.ball) {
+                // ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
+                ball.ball.applyTorque(ball.accel);
+
             }
             keepOne = ball;
-            if (ball.jump && ball.ball.position.y < 0) {
-                ball.ball.applyCentralImpulse({x:0, y: 4000, z: 0});
-                ball.jump = false;
+            if (ball.jump && touchingGround) {
+                ball.ball.applyCentralImpulse({x:0, y: ball.jump * 600, z: 0});
+                ball.jump--;
             }
         });
         scene.simulate();
         if (keepOne && keepLooking) {
             if (perspectiveOrOrtho === "perspective") {
-                camera.lookAt(keepOne.ball.position);
+                camera.position.set(0 + keepOne.ball.position.x, 60 + keepOne.ball.position.y, 120 + keepOne.ball.position.z);
+                // camera.lookAt(keepOne.ball.position); (same cam position keep looking)
             } else {
                 // ortho keep looking
-                camera.position.set(40 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 0 + keepOne.ball.position.z);
+                camera.position.set(0 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 40 + keepOne.ball.position.z);
             }
 
         }
-
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     };
@@ -229,6 +240,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         window.onload = initScene();
         balls = {};
     }
+    console.log(scene);
 
     return scene;
 

@@ -8,7 +8,7 @@ app.config(function ($stateProvider) {
                 $scope.balls[ball.socketId] = {
                     ball: ball.ball,
                     socketId: ball.socketId,
-                    photo: Images[ball.face],
+                    photo: ball.face,
                     name: ball.name,
                     start: new Date(),
                     timeIn: 0
@@ -20,7 +20,7 @@ app.config(function ($stateProvider) {
                 $scope.currentTime = new Date();
                 _.forEach($scope.balls, function (ball) {
                     ball.timeIn = $scope.currentTime - ball.start;
-                    if (ball.ball.position.y < -5) {
+                    if (ball.ball.position.y < -20) {
                         $rootScope.$broadcast('removeBall', ball.socketId);
                         delete $scope.balls[ball.socketId];
                         Three.remove(ball.ball);

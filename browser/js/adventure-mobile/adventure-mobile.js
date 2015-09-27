@@ -1,8 +1,8 @@
 app.config(function ($stateProvider) {
-    $stateProvider.state('mobile', {
-        url: '/mobile',
-        templateUrl: '/js/mobile/mobile.html',
-        controller: 'MobileCtrl',
+    $stateProvider.state('adventure-mobile', {
+        url: '/adventure-mobile',
+        templateUrl: '/js/adventure-mobile/adventure-mobile.html',
+        controller: 'AdvMobileCtrl',
         resolve: {
             images: function (Images) {
                 return Images.getAll();
@@ -11,7 +11,7 @@ app.config(function ($stateProvider) {
     });
 });
 
-app.controller('MobileCtrl', function ($scope, images, Socket, $state, Upload, Images) {
+app.controller('AdvMobileCtrl', function ($scope, images, Socket, $state, Upload, Images) {
     $scope.images = images;
     // upload later on form submit or something similar
     $scope.submit = function() {
@@ -49,7 +49,9 @@ app.controller('MobileCtrl', function ($scope, images, Socket, $state, Upload, I
     });
 
     $scope.ready = function (phone) {
-        Socket.emit('newChallenger', phone)
+        console.log('ready', phone)
+
+        Socket.emit('phoneReadyAdventure', phone)
 
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', function (e) {
@@ -77,4 +79,6 @@ app.controller('MobileCtrl', function ($scope, images, Socket, $state, Upload, I
         // $state.go('home');
     };
 
-})
+});
+
+
