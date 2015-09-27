@@ -7,6 +7,10 @@ app.directive('roundPlatform', function (Material) {
         link: function (scope, element, attrs) {
             var color = scope.threeObj.colors[Math.floor(Math.random() * scope.threeObj.colors.length)]
             var discRad = Number(attrs.width);
+            if (attrs.hasOwnProperty('win')) {
+                console.log('win detected');
+                color = 0x61B329;
+            }
             var planeGeo = new THREE.CylinderGeometry(discRad, discRad, 5, 32);
             var round = new Physijs.CylinderMesh(
                 planeGeo,
@@ -29,7 +33,16 @@ app.directive('roundPlatform', function (Material) {
 
             scope.threeObj.platforms.push(round);
 
+            if (attrs.hasOwnProperty('win')) {
+                round.addEventListener('collision', function () {
+                    console.log('win')
+                    scope.win()
+                });
+            }
+
             scope.threeObj.scene.add(round);
+
+
 
 
         }

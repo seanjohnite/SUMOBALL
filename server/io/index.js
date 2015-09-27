@@ -60,6 +60,7 @@ module.exports = function (server) {
         });
 
         socket.on('changeMotion', function () {
+            console.log('big moves')
             _.forEach(stages, function (stageSocketId) {
                 io.to(stageSocketId).emit('jump', socket.id);
             });
