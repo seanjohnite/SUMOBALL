@@ -1,41 +1,50 @@
 /* global THREE THREEx Physijs */
 
-app.directive('scene', function () {
+app.directive('scene', function (Light) {
 
     return {
         restrict: 'E',
         link: function (scope) {
             var wWidth = window.innerWidth;
             var wHeight = window.innerHeight;
-            scope.renderer = new THREE.WebGLRenderer({ antialias: false });
-            scope.renderer.shadowMap.enabled = true;
-            scope.renderer.shadowMapSoft = true;
-            scope.renderer.shadowCameraNear = 3;
-            scope.renderer.shadowCameraFov = 50;
+            scope.threeObj.renderer = new THREE.WebGLRenderer({ antialias: false });
+            scope.threeObj.renderer.shadowMap.enabled = true;
+            scope.threeObj.renderer.shadowMapSoft = true;
+            scope.threeObj.renderer.shadowCameraNear = 3;
+            scope.threeObj.renderer.shadowCameraFov = 50;
 
-            scope.renderer.shadowMapBias = 0.0039;
-            scope.renderer.shadowMapDarkness = 1;
-            scope.renderer.shadowMapWidth = 1024;
-            scope.renderer.shadowMapHeight = 1024;
-            scope.renderer.setSize(wWidth, wHeight);
+            scope.threeObj.renderer.shadowMapBias = 0.0039;
+            scope.threeObj.renderer.shadowMapDarkness = 1;
+            scope.threeObj.renderer.shadowMapWidth = 1024;
+            scope.threeObj.renderer.shadowMapHeight = 1024;
+            scope.threeObj.renderer.setSize(wWidth, wHeight);
+            document.getElementById('adventure').appendChild(scope.threeObj.renderer.domElement);
 
-            scope.scene = new Physijs.Scene;
-            scope.scene.setGravity(new THREE.Vector3( 0, -50, 0 ));
+            scope.threeObj.scene = new Physijs.Scene;
+            scope.threeObj.scene.setGravity(new THREE.Vector3( 0, -50, 0 ));
 
-            if (scope.config.ortho) {
+            if (scope.threeObj.config.ortho) {
+                console.log('running ortho')
                 var aspectRatio = wWidth / wHeight;
                 var height = 100;
                 var width = aspectRatio * height;
-                scope.camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
-                scope.camera.position.set(0, 30, 40);
-            } else if (scope.config.perspective) {
-                scope.camera = new THREE.PerspectiveCamera(35, wWidth / wHeight, 1, 1000);
-                scope.camera.position.set(0, 60, 120);
+                scope.threeObj.camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+                scope.threeObj.camera.position.set(0, 30, 40);
+            } else if (scope.threeObj.config.perspective) {
+                console.log('running perspective')
+                scope.threeObj.camera = new THREE.PerspectiveCamera(35, wWidth / wHeight, 1, 1000);
+                scope.threeObj.camera.position.set(0, 60, 120);
             }
+            scope.threeObj.camera.lookAt(scope.threeObj.scene.position);
 
-            scope.scene.add(scope.camera);
-            scope.renderer.shadowCameraFar = scope.camera.far;
-            THREEx.WindowResize(scope.renderer, scope.camera);
+            scope.threeObj.scene.add(scope.threeObj.camera);
+            scope.threeObj.renderer.shadowCameraFar = scope.threeObj.camera.far;
+            THREEx.WindowResize(scope.threeObj.renderer, scope.threeObj.camera);
+
+            // var pointlight = new THREE.PointLight(0xffffff, 1, 0);
+            // scope.threeObj.scene.add(pointlight);
+
+
 
             var spotLight2 = new THREE.SpotLight( 0xffffff );
             spotLight2.position.set( 800, 800, 800 );
@@ -49,8 +58,8 @@ app.directive('scene', function () {
             spotLight2.shadowCameraFar = 4000;
             spotLight2.shadowCameraFov = 30;
 
-            scope.scene.add( spotLight2 );
-
+            scope.threeObj.scene.add( spotLight2 );
+            console.log(scope.threeObj.scene.uuid);
 
         }
 

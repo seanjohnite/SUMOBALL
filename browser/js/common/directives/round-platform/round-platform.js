@@ -1,15 +1,16 @@
-/* global THREE THREEx Physijs */
+/* global THREE Physijs */
 
-app.directive('round-platform', function (Material) {
+app.directive('roundPlatform', function (Material) {
 
     return {
         restrict: 'E',
-        templateUrl: 'js/common/directives/round-platform/round-platform.html',
         link: function (scope, element, attrs) {
-            var planeGeo = new THREE.CylinderGeometry(attrs.width, attrs.width, 5, 32);
+            console.log("adding round platform")
+            var discRad = Number(attrs.width);
+            var planeGeo = new THREE.CylinderGeometry(discRad, discRad, 5, 32);
             var round = new Physijs.CylinderMesh(
                 planeGeo,
-                Material(0x666666, 0.8, 0.3),
+                Material(0xffffff, 0.8, 0.3),
                 0
             )
             round.receiveShadow = true;
@@ -21,13 +22,15 @@ app.directive('round-platform', function (Material) {
                 });
                 round.position.set(...position);
             } else {
-                var newPos = scope.lastEdge + new THREE.Vector3(attrs.width / 2, 0 , 0);
-                round.position = newPos;
+                var lst = scope.threeObj.lastEdge;
+                round.position.set(lst.x, lst.y, lst.z - discRad * 2);
+                scope.threeObj.lastEdge = round.position;
             }
 
-            scope.platforms.push(round);
+            scope.threeObj.platforms.push(round);
 
-            scope.scene.add(round);
+            scope.threeObj.scene.add(round);
+
 
         }
 

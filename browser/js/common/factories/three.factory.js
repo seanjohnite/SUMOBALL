@@ -2,7 +2,7 @@
 
 app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $rootScope) {
     // config
-    var perspectiveOrOrtho = "ortho";
+    var perspectiveOrOrtho = "perspective";
     var keepLooking = false;
 
     // game is starting, close all prev sockets
@@ -73,40 +73,20 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         scene.add( spotLight2 );
 
 
-        box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.6));
+        box = Box(5, 5, 5, Material(0x71d913, 0.8, 0.8));
         box.castShadow = true;
-        console.log(box);
-        box.addEventListener('collision', function (other_object) {
-            console.log(`collision with ${other_object}!!`)
-        })
 
-        mesh = new Physijs.SphereMesh(
-            new THREE.SphereGeometry( 3 ),
-            new THREE.MeshBasicMaterial({ color: 0x888888 })
-        );
-        mesh.addEventListener( 'collision', function( other_object, relative_velocity, relative_rotation, contact_normal ) {
-            console.log('fucking a')
-        });
-        mesh.position.set(0, 20, 0);
-        scene.add(mesh);
-
-        // var planeGeo = new THREE.CylinderGeometry(40, 40, 10, 32);
+        var planeGeo = new THREE.CylinderGeometry(40, 40, 3, 32);
         var ground_material = Physijs.createMaterial(
             new THREE.MeshLambertMaterial({ color: 0x888888 }),
-            .8, // high friction
-            .3 // low restitution
+            1, // high friction
+            .1 // low restitution
         );
-        ground = new Physijs.BoxMesh(
-            new THREE.BoxGeometry(100, 1, 100),
+        ground = new Physijs.CylinderMesh(
+            planeGeo,
             ground_material,
             0 // mass
         );
-        ground.addEventListener( 'collision', function ( other_object, linear_velocity, angular_velocity ) {
-            console.log('wtf mate');
-            // `this` is the mesh with the event listener
-            // other_object is the object `this` collided with
-            // linear_velocity and angular_velocity are Vector3 objects which represent the velocity of the collision
-        });
 
         // var plane = Box(75, .1, 150, material, 0);
         ground.receiveShadow = true;
@@ -136,7 +116,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         if (!phone) {
             phone = {
                 name: "RandoPerson",
-                face: "gabe"
+                face: "/images/gabriel_lebec@2x.jpg"
             }
         }
         var thisSphere = new Ball(phone);
@@ -145,9 +125,6 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         thisSphere.socketId = socketId;
         console.log(thisSphere);
         $rootScope.$broadcast('newBall', thisSphere);
-        thisSphere.ball.addEventListener('collision', function () {
-            console.log('totally just ran into somethin!!')
-        })
         scene.add(thisSphere.ball);
     }
 
@@ -206,7 +183,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         var thisBall = balls[socketId]
         newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma);
 
-        thisBall.accel = new THREE.Vector3(4 * newOrientation.gamma, -6, 4 * newOrientation.beta);
+        thisBall.accel = new THREE.Vector3(1000 * newOrientation.beta, 0, 1000 * -newOrientation.gamma);
 
     });
 
@@ -220,26 +197,25 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         else thisBall.jump = 10;
     });
 
-    var platform = true;
-    Socket.on('platformStart', function () {
 
-    });
 
     $rootScope.$on('removeBall', function (e, socketId) {
         delete balls[socketId];
     });
 
-    var count = 0;
 
     render = function () {
         var keepOne;
         _.forEach(balls, function (ball) {
-            if (ball.ball && ball.ball.position.y < 0) {
-                ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
+            var touchingGround = (ball.ball._physijs.touches.indexOf(ground._physijs.id) > -1);
+            if (ball.ball) {
+                // ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
+                ball.ball.applyTorque(ball.accel);
+
             }
             keepOne = ball;
-            if (ball.jump && ball.ball.position.y < 0) {
-                ball.ball.applyCentralImpulse({x:0, y: ball.jump * 300, z: 0});
+            if (ball.jump && touchingGround) {
+                ball.ball.applyCentralImpulse({x:0, y: ball.jump * 600, z: 0});
                 ball.jump--;
             }
         });
@@ -262,6 +238,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         window.onload = initScene();
         balls = {};
     }
+    console.log(scene);
 
     return scene;
 

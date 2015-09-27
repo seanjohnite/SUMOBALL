@@ -1,62 +1,50 @@
+/* global THREE */
+
 app.config(function ($stateProvider) {
     $stateProvider.state('adventure', {
         url: '/adventure',
         templateUrl: '/js/adventure/adventure.html',
-        controller: function ($scope, Images, Socket, $rootScope) {
-            $scope.renderer;
-            $scope.scene;
-            $scope.lastEdge = new THREE.Vector3(-3,0,0);
-            $scope.config = {
-                ortho: true,
-                perspective: false,
-                watch: true
-            };
+        controller: function ($scope) {
+            $scope.threeObj = {
+                renderer: null,
+                scene: null,
+                camera: null,
+                lastEdge: new THREE.Vector3(0, 0, 30),
+                firstView: new THREE.Vector3(0, 60, 250),
+                platforms: [],
+                config: {
+                    ortho: false,
+                    perspective: true,
+                    watch: true
+                },
+                ball: null
+            }
 
-            $scope.platforms = [];
 
-            $scope.camera;
+            var applyT = function (ball, accel) {
+                ball.applyTorque(accel)
+            }
 
-            $scope.ball;
+            var watchIt = function (ball, camera) {
+                var fV = $scope.threeObj.firstView;
+                camera.position.set(fV.x + ball.position.x, fV.y + ball.position.y + 50, fV.z + ball.position.z);
+            }
 
             var render = function () {
-                var keepOne;
-                if ($scope.ball) applyAccel($scope.ball);
-                if ($scope.config.watch) watchIt($scope.ball);
-                $scope.scene.simulate();
-                $scope.renderer.render($scope.scene, $scope.camera);
+                if ($scope.threeObj.ball && $scope.threeObj.accel) applyT($scope.threeObj.ball.ball, $scope.threeObj.accel);
+                if ($scope.threeObj.ball &&
+                    $scope.threeObj.config.watch) {
+                    watchIt($scope.threeObj.ball.ball, $scope.threeObj.camera);
+                }
+                $scope.threeObj.scene.simulate();
+                $scope.threeObj.renderer.render($scope.threeObj.scene, $scope.threeObj.camera);
                 requestAnimationFrame(render);
             };
 
-            $scope.init = function () {
+            $scope.init = function () { // called in scene end
+                $scope.threeObj.camera.lookAt($scope.threeObj.scene.position);
                 requestAnimationFrame(render);
             }
-
-            var applyAccel = function (ball, accel) {
-                if (ball && ball.position.y < 1) // check for contact/low enough
-                    ball.applyImpulse(accel, {}) //ball._physijs.radius
-            }
-
-                // if (keepOne && keepLooking) {
-                //     if (perspectiveOrOrtho === "perspective") {
-                //         camera.position.set(0 + keepOne.ball.position.x, 60 + keepOne.ball.position.y, 120 + keepOne.ball.position.z);
-                //         // camera.lookAt(keepOne.ball.position); (same cam position keep looking)
-                //     } else {
-                //         // ortho keep looking
-                //         camera.position.set(0 + keepOne.ball.position.x, 30 + keepOne.ball.position.y, 40 + keepOne.ball.position.z);
-                //     }
-
-                // }
-                // _.forEach(balls, function (ball) {
-                //     if (ball.ball && ball.ball.position.y < 0) {
-                //         ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
-                //     }
-                //     keepOne = ball;
-                //     if (ball.jump && ball.ball.position.y < 0) {
-                //         ball.ball.applyCentralImpulse({x:0, y: ball.jump * 300, z: 0});
-                //         ball.jump--;
-                //     }
-                // });
-
 
         }
     });
