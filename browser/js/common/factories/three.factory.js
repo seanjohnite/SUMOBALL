@@ -32,7 +32,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         document.getElementById('game').appendChild(renderer.domElement);
 
         scene = new Physijs.Scene;
-        scene.setGravity(new THREE.Vector3( 0, -50, 0 ))
+        scene.setGravity(new THREE.Vector3( 0, -80, 0 ))
 
         if (perspectiveOrOrtho === "ortho") {
             var aspectRatio = wWidth / wHeight;
@@ -183,7 +183,9 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
         var thisBall = balls[socketId]
         newOrientation.gamma = resolveGamma(thisBall, newOrientation.gamma);
 
-        thisBall.accel = new THREE.Vector3(1000 * newOrientation.beta, 0, 1000 * -newOrientation.gamma);
+        // console.log(thisBall.ball._physijs.linearVelocity.length());
+
+        thisBall.accel = new THREE.Vector3(1600 * newOrientation.beta, 0, 1600 * -newOrientation.gamma);
 
     });
 
