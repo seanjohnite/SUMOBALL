@@ -2,8 +2,18 @@
   box-sizing: border-box;
 }
 
+$imgKey: random(1);
+
+$list: 'space';
+$nth: nth($list, $imgKey);
+
 body {
-  background: #fdfdfd;
+  // padding-top: 10px;
+  // background: #fdfdfd;
+  background-image: url("/images/#{$nth}.jpg");
+  // background-size: 100%;
+  background-position: center;
+  background-color: #cccccc;
   padding: 0;
   margin: 0;
   overflow: hidden;
@@ -26,8 +36,11 @@ body {
   margin: 0 auto;
 }
 
+@import 'adventure/main';
 @import 'directives/main';
 @import 'home/main';
 @import 'login/main';
 @import 'media-queries/main';
 @import 'game-stage/main';
+
+

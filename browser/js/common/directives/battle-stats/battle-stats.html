@@ -1,0 +1,22 @@
+<div class="overlay panel panel-inverse">
+  <div class="panel-heading">
+    <h1 class="panel-title">Contenders</h1>
+  </div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Picture</th>
+        <th>Time In the Game</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="ball in threeObj.balls">
+        <td>{{ball.name}}</td>
+        <td><img ng-src="{{ball.face}}" alt="gabe"></td>
+        <td>{{ball.timeIn | date: 'mm:ss'}}</td>
+      </tr>
+    </tbody>
+
+  </table>
+</div>

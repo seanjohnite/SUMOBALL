@@ -191,12 +191,9 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
 
     Socket.on('jump', function (socketId) {
         if (mobile) return;
-        if (!balls[socketId]) {
-            makeBall(socketId)
-        }
+        if (!balls[socketId]) return;
         var thisBall = balls[socketId]
-        if (thisBall.jump) thisBall.jump--;
-        else thisBall.jump = 10;
+        thisBall.jump = true;
     });
 
 
@@ -209,7 +206,7 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
     render = function () {
         var keepOne;
         _.forEach(balls, function (ball) {
-            var touchingGround = (ball.ball._physijs.touches.indexOf(ground._physijs.id) > -1);
+            var touchingGround = ball.ball._physijs.touches.length;
             if (ball.ball) {
                 // ball.ball.applyImpulse(ball.accel, {x: 0, y: 3, z:0});
                 ball.ball.applyTorque(ball.accel);
@@ -218,8 +215,9 @@ app.factory('Three', function (Socket, Box, Sphere, Material, Light, Ball, $root
             keepOne = ball;
             if (ball.jump && touchingGround) {
                 ball.ball.applyCentralImpulse({x:0, y: ball.jump * 600, z: 0});
-                ball.jump--;
+                ball.jump = false;
             }
+            ball.jump = false;
         });
         scene.simulate();
         if (keepOne && keepLooking) {

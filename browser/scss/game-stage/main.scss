@@ -1,10 +1,10 @@
-#game {
+#battle {
   .overlay {
-    color: white;
+    color: black;
     position: absolute;
     left: 10px;
     top: 10px;
-    background: transparent;
+    // background: transparent;
   }
 
   img {
@@ -12,3 +12,21 @@
     width: 40px;
   }
 }
+
+#game {
+  .overlay {
+    color: black;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    // background: transparent;
+  }
+
+  img {
+    height: 40px;
+    width: 40px;
+  }
+}
+
+
+

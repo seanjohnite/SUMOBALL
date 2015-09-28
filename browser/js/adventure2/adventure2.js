@@ -1,9 +1,9 @@
 /* global THREE */
 
 app.config(function ($stateProvider) {
-    $stateProvider.state('adventure', {
-        url: '/adventure',
-        templateUrl: '/js/adventure/adventure.html',
+    $stateProvider.state('adventure2', {
+        url: '/adventure2',
+        templateUrl: '/js/adventure2/adventure2.html',
         controller: function ($scope, Socket) {
             Socket.emit('newGameStarting');
 

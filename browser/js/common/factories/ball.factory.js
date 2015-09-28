@@ -1,4 +1,4 @@
-app.factory('Ball', function (Sphere, Material, Images) {
+app.factory('Ball', function (Sphere, Material) {
 
     function pickRandomProperty(obj) {
         var result;
@@ -9,13 +9,18 @@ app.factory('Ball', function (Sphere, Material, Images) {
         return result;
     }
 
-    var randos = 1;
 
     var Ball = function (phone) {
         if (!phone) {
-            phone.name = `Rando Person ${randos}`;
-            phone.face = pickRandomProperty(Images);
+            phone = {};
+            phone.name = 'Rando Person';
+            console.log(phone)
+            phone.face = '/images/joe_alves@2x.jpg';
         }
+        if (phone.name === 'cpu') {
+            phone.face = '/images/Cartoon_Robot.png'
+        }
+
 
         this.face = phone.face;
 
@@ -27,7 +32,7 @@ app.factory('Ball', function (Sphere, Material, Images) {
             z: 0
         };
 
-        this.ball = Sphere(4, Material(this.color, 1, 0.8, this.face));
+        this.ball = Sphere(4, Material(this.color, 1, 0.9, this.face));
         this.ball.castShadow = true;
     }
 
