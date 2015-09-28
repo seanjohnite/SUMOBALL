@@ -17,6 +17,9 @@ app.factory('Ball', function (Sphere, Material) {
             console.log(phone)
             phone.face = '/images/joe_alves@2x.jpg';
         }
+        if (phone.name === 'cpu') {
+            phone.face = '/images/Cartoon_Robot.png'
+        }
 
 
         this.face = phone.face;

@@ -26,8 +26,10 @@ app.config(function ($stateProvider) {
             }
 
             $scope.addCPU = function () {
-                var pc = new Ball();
+                var pc = new Ball({name: 'cpu'});
                 console.log('adding cpu')
+                pc.ball.position.set(-10, 10, -5);
+                $scope.threeObj.pc = pc
                 $scope.threeObj.scene.add(pc.ball);
             }
 
@@ -68,7 +70,26 @@ app.config(function ($stateProvider) {
                 })
             }
 
+            var dealWithCPU = function () {
+                var pc = $scope.threeObj.pc;
+                if (!pc) return;
+                var xT, zT, factor = 30000;
+                if (pc.ball.position.x > 0)
+                    xT = factor * pc.ball.position.x ;
+                else
+                    xT = -factor * pc.ball.position.x;
+                if (pc.ball.position.z > 0)
+                    zT = factor * pc.ball.position.z;
+                else
+                    zT = -factor * pc.ball.position.z;
+
+                // var zT = 1600 * pc.ball.position.z;
+                // console.log(xT, zT)
+                pc.ball.applyTorque(new THREE.Vector3(-zT, 0, xT));
+            }
+
             var render = function () {
+                dealWithCPU();
                 applyAllTorqueJumpsRemove($scope.threeObj.balls)
                 if ($scope.threeObj.config.watch) watchIt($scope.threeObj.balls[0].ball, $scope.threeObj.camera);
                 $scope.threeObj.scene.simulate();
