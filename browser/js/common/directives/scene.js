@@ -7,7 +7,7 @@ app.directive('scene', function () {
         link: function (scope) {
             var wWidth = window.innerWidth;
             var wHeight = window.innerHeight;
-            scope.threeObj.renderer = new THREE.WebGLRenderer({ antialias: false });
+            scope.threeObj.renderer = new THREE.WebGLRenderer({ antialias: true });
             scope.threeObj.renderer.setClearColor(scope.threeObj.background);
             scope.threeObj.renderer.shadowMap.enabled = true;
             scope.threeObj.renderer.shadowMapSoft = true;

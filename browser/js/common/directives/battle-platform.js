@@ -18,6 +18,13 @@ app.directive('battlePlatform', function (Material, Box) {
                 )
             } else if (attrs.type === "square") {
                 platform = Box(big * 2, 5, big * 2, Material(color, 0.9, 0.01), 0)
+            } else if (attrs.type === "cone") {
+                var cyl = new THREE.CylinderGeometry(0, big, 5, 32);
+                platform = new Physijs.ConeMesh(
+                    cyl,
+                    Material(color, .9, .01),
+                    0
+                )
             }
             platform.receiveShadow = true;
             platform.position.set(0, -5, 0);
