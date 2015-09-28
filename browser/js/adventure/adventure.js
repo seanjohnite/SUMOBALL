@@ -21,7 +21,8 @@ app.config(function ($stateProvider) {
                     perspective: true,
                     watch: true
                 },
-                ball: null
+                ball: null,
+                lastLength: null
             }
 
             $scope.win = function () {

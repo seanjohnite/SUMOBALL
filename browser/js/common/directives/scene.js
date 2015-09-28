@@ -24,7 +24,6 @@ app.directive('scene', function () {
             scope.threeObj.scene = new Physijs.Scene;
             scope.threeObj.scene.setGravity(new THREE.Vector3( 0, -50, 0 ));
 
-            console.log("poop");
 
             var fV = scope.threeObj.firstView;
 

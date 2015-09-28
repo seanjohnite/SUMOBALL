@@ -18,17 +18,14 @@ app.directive('roundPlatform', function (Material) {
                 0
             )
             round.receiveShadow = true;
-            if (attrs.absolute) {
-                var position = attrs.absolute.split(",").map(function (chr) {
-                    var n = Number(chr);
-                    if (n.isNaN()) throw Error('NaN in position');
-                    return n;
-                });
-                round.position.set(...position);
+
+            if (!scope.threeObj.lastLength) {
+                console.log('adding first one')
+                round.position.set(0, -10, 0);
+                scope.threeObj.lastLength = discRad;
             } else {
-                var lst = scope.threeObj.lastEdge;
-                round.position.set(lst.x, lst.y, lst.z - discRad * 2);
-                scope.threeObj.lastEdge = round.position;
+                round.position.set(0, -10, -(scope.threeObj.lastLength + discRad));
+                scope.threeObj.lastLength += discRad * 2;
             }
 
             scope.threeObj.platforms.push(round);
