@@ -9,9 +9,11 @@
   <round-platform width="20"></round-platform>
   <round-platform width="10"></round-platform>
   <round-platform width="5" win></round-platform>
-  <div id="congrats">
-    <h1 ng-show="header">YAAAYYYYY!</h1>
+  <scene-end></scene-end>
+
+  <div ng-show="header" id="congrats">
+    <h1>YAAAYYYYY!</h1>
+    <a class="btn btn-success" ui-sref="adventure2">Go to the next level!</a>
   </div>
   <!-- <round-platform></round-platform> -->
-  <scene-end></scene-end>
 </div>

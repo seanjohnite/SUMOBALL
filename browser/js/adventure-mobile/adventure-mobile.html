@@ -1,51 +1,53 @@
 <navbar></navbar>
-<div class="container">
-  <h1>Adventure Control</h1>
-  <form name="imageForm">
-    <label for="name">Image name</label>
-    <div class="form-group">
-      <input
-        ng-model="imageName"
-        name="imageName"
-        type="text"
-        id="name"
-        class="form-control"
-        required>
-      <i ng-show="imageForm.imageName.$error.required">*required</i>
-    </div>
-    <div class="form-group">
-      <label for="file">Upload image</label>
-      <div
-        class="button btn btn-success"
-        ngf-select
-        ng-model="file"
-        name="file"
-        ngf-pattern="'image/*'"
-        accept="image/*"
-        ngf-max-size="20MB"
-        ngf-min-height="100"
-        ngf-resize="{width: 100, height: 100}">Select</div>
-    </div>
-    <img ng-show="imageForm.file.$valid" ngf-thumbnail="!picFile.$error && picFile" class="thumb">
-    <button class="btn btn-success" type="submit" ng-click="submit()">submit</button>
-  </form>
-  <form>
-    <div class="form-group">
-      <label for="name">Your name</label>
-      <input class="form-control" id="name" ng-model="phone.name" type="text"/>
-    </div>
-    <div class="form-group">
-      <label>Your face</label>
-      <div>
-            <label
-              ng-repeat="face in images"
-              class="btn btn-info"
-              ng-model="phone.face"
-              btn-radio="'{{face.route}}'">{{face.name}}</label>
+<div class="panel panel-default">
+  <div class="container">
+    <h1>Adventure Control</h1>
+    <form name="imageForm">
+      <label for="name">Image name</label>
+      <div class="form-group">
+        <input
+          ng-model="imageName"
+          name="imageName"
+          type="text"
+          id="name"
+          class="form-control"
+          required>
+        <i ng-show="imageForm.imageName.$error.required">*required</i>
       </div>
-    </div>
-    <div class="form-group">
-      <button class="btn btn-success" ng-click="ready(phone)">Ready to roll!</button>
-    </div>
-  </form>
+      <div class="form-group">
+        <label for="file">Upload image</label>
+        <div
+          class="button btn btn-success"
+          ngf-select
+          ng-model="file"
+          name="file"
+          ngf-pattern="'image/*'"
+          accept="image/*"
+          ngf-max-size="20MB"
+          ngf-min-height="100"
+          ngf-resize="{width: 100, height: 100}">Select</div>
+      </div>
+      <img ng-show="imageForm.file.$valid" ngf-thumbnail="!picFile.$error && picFile" class="thumb">
+      <button class="btn btn-success" type="submit" ng-click="submit()">submit</button>
+    </form>
+    <form>
+      <div class="form-group">
+        <label for="name">Your name</label>
+        <input class="form-control" id="name" ng-model="phone.name" type="text"/>
+      </div>
+      <div class="form-group">
+        <label>Your face</label>
+        <div>
+              <label
+                ng-repeat="face in images"
+                class="btn btn-info"
+                ng-model="phone.face"
+                btn-radio="'{{face.route}}'">{{face.name}}</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-success" ng-click="ready(phone)">Ready to roll!</button>
+      </div>
+    </form>
+  </div>
 </div>

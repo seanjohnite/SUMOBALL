@@ -7,8 +7,8 @@ app.directive('scene', function () {
         link: function (scope) {
             var wWidth = window.innerWidth;
             var wHeight = window.innerHeight;
-            scope.threeObj.renderer = new THREE.WebGLRenderer({ antialias: true });
-            scope.threeObj.renderer.setClearColor(scope.threeObj.background);
+            scope.threeObj.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            // scope.threeObj.renderer.setClearColor(scope.threeObj.background, 0.0);
             scope.threeObj.renderer.shadowMap.enabled = true;
             scope.threeObj.renderer.shadowMapSoft = true;
             scope.threeObj.renderer.shadowCameraNear = 3;
@@ -22,7 +22,7 @@ app.directive('scene', function () {
             scope.addRenderer(scope.threeObj.renderer);
 
             scope.threeObj.scene = new Physijs.Scene;
-            scope.threeObj.scene.setGravity(new THREE.Vector3( 0, -50, 0 ));
+            scope.threeObj.scene.setGravity(new THREE.Vector3( 0, -70, 0 ));
 
 
             var fV = scope.threeObj.firstView;

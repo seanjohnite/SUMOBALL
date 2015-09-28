@@ -75,13 +75,13 @@ app.config(function ($stateProvider) {
                 if (!pc) return;
                 var xT, zT, factor = 30000;
                 if (pc.ball.position.x > 0)
-                    xT = factor * pc.ball.position.x ;
+                    xT = factor;
                 else
-                    xT = -factor * pc.ball.position.x;
+                    xT = -factor;
                 if (pc.ball.position.z > 0)
-                    zT = factor * pc.ball.position.z;
+                    zT = factor;
                 else
-                    zT = -factor * pc.ball.position.z;
+                    zT = -factor;
 
                 // var zT = 1600 * pc.ball.position.z;
                 // console.log(xT, zT)
