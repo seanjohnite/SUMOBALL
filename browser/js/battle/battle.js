@@ -4,7 +4,7 @@ app.config(function ($stateProvider) {
     $stateProvider.state('battle', {
         url: '/battle',
         templateUrl: '/js/battle/battle.html',
-        controller: function ($scope, Socket) {
+        controller: function ($scope, Socket, Ball) {
             Socket.emit('newGameStarting');
 
             $scope.threeObj = {
@@ -21,7 +21,14 @@ app.config(function ($stateProvider) {
                     perspective: true,
                     watch: false
                 },
-                balls: {}
+                balls: {},
+                pc: null
+            }
+
+            $scope.addCPU = function () {
+                var pc = new Ball();
+                console.log('adding cpu')
+                $scope.threeObj.scene.add(pc.ball);
             }
 
             $scope.addRenderer = function (renderer) {

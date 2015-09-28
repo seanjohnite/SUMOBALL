@@ -9,13 +9,15 @@ app.factory('Ball', function (Sphere, Material) {
         return result;
     }
 
-    var randos = 1;
 
     var Ball = function (phone) {
         if (!phone) {
-            phone.name = `Rando Person ${randos}`;
-            phone.face = '/images/joe_alves@2x.jpg'
+            phone = {};
+            phone.name = 'Rando Person';
+            console.log(phone)
+            phone.face = '/images/joe_alves@2x.jpg';
         }
+
 
         this.face = phone.face;
 
