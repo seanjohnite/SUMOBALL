@@ -1,4 +1,4 @@
-# SUMOBALL
+# SUMOBALL[http://sumoball.seanj.ninja]
 Get nostalgic for Mario Party while playing this great ball-rolling game controlled with your phone!
 
 ## To play:
