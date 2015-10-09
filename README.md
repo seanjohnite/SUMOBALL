@@ -1,9 +1,9 @@
-# SUMOBALL[http://sumoball.seanj.ninja]
+# [SUMOBALL](http://sumoball.seanj.ninja)
 Get nostalgic for Mario Party while playing this great ball-rolling game controlled with your phone!
 
 ## To play:
-1.  Connect to this website with your smartphone.
-2.  Click the blue button above to host a game, and then tap the green button on your phone.
+1.  Connect to [this website](http://sumoball.seanj.ninja) with your smartphone and computer.
+2.  Click the blue button to host a game, and then tap the green button on your phone.
 3.  On your phone, type a name for yourself, choose a "face" using the buttons, and then tap Ready to roll!
 4.  You're now controlling the ball that just appeared on the screen with your phone! Hold it flat to stay still, and tilt to move around.
 
